@@ -1,44 +1,30 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+this is a simple RxJS code for practicing async request, using Stack Exchange API.
 
-## Available Scripts
+following is the core code bundle of this repository
 
-In the project directory, you can run:
+```javascript
+sbj.pipe(filter((value, index) => value !== ''))
+            .pipe(debounceTime(1000))
+            .pipe(distinctUntilChanged())
+            .pipe(switchMap((value:any, index : number) =>{
+                return ajax.get(`https://api.stackexchange.com/2.2/search?order=desc&sort=activity&intitle=${value}&site=stackoverflow`)
+                    .pipe(map(r => r.response.items))
+                    .pipe(retry(3))
+                }
+            ))
+            .subscribe(
+                (value: any) => {
+                    setResult(value);
+                },
+                (err : any) => setError('error!'),
+        );
+```
 
-### `yarn start`
+we can handle the data stream of any observable by using some great operators, chained by pipe() function.
 
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+By using Reactive X, we can take following advantages :
+1. We can cancel unwanted HTTP Request easily.
+2. We can retry Ajax as many as we can simply by using retry(count : number) operator.
+3. This way of dealing with complex ajax goes very well with the paradigm of functional programming.
 
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
-
-### `yarn test`
-
-Launches the test runner in the interactive watch mode.<br />
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `yarn build`
-
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `yarn eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (Webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+We can achieve very simple and sophisticated FC by using various Rx operator including those above.
